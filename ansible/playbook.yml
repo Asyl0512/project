@@ -1,0 +1,5 @@
+- hosts: ec2host
+  become: yes
+  roles:
+    - prometheus
+    - grafana

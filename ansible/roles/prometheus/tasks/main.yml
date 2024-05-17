@@ -1,0 +1,76 @@
+- name: Create Prometheus user
+  user:
+    name: prometheus
+    system: yes
+    createhome: no
+    shell: /bin/false
+
+- name: Download Prometheus
+  get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v2.45.0/prometheus-2.45.0.linux-amd64.tar.gz
+    dest: /tmp/prometheus.tar.gz
+
+- name: Extract Prometheus
+  unarchive:
+    src: /tmp/prometheus.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    creates: /usr/local/bin/prometheus
+
+- name: Create directories for Prometheus configuration
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - /data
+    - /etc/prometheus
+
+- name: Move Prometheus configurations
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: prometheus
+    group: prometheus
+  with_items:
+    - { src: 'prometheus.yml', dest: '/etc/prometheus/prometheus.yml' }
+    - { src: 'consoles', dest: '/etc/prometheus/consoles' }
+    - { src: 'console_libraries', dest: '/etc/prometheus/console_libraries' }
+
+- name: Setup Prometheus service
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+  notify: Restart prometheus
+
+
+- name: Enable and start Prometheus
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+
+
+- name: Deploy Prometheus configuration
+  copy:
+    src: prometheus.yml
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+
+- name: Deploy console templates
+  copy:
+    src: consoles/
+    dest: /etc/prometheus/consoles/
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+
+- name: Deploy console libraries
+  copy:
+    src: console_libraries/
+    dest: /etc/prometheus/console_libraries/
+    owner: prometheus
+    group: prometheus
+    mode: 0755

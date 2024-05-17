@@ -1,0 +1,2 @@
+[ec2host]
+52.36.9.150 ansible_ssh_user=ubuntu key_file=~/.ssh/id_rsa.pub

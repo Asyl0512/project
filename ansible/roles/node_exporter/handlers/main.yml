@@ -1,0 +1,14 @@
+- name: restart node_exporter
+  systemd:
+    name: node_exporter
+    state: restarted
+    daemon_reload: yes
+  become: yes
+  when: ansible_facts['os_family'] == "Debian"
+
+- name: reload node_exporter
+  systemd:
+    name: node_exporter
+    state: reloaded
+  become: yes
+  when: ansible_facts['os_family'] == "Debian"

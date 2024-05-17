@@ -1,0 +1,5 @@
+{{ define "header" }}
+  <head>
+    <title>Prometheus Node Exporter</title>
+  </head>
+{{ end }}
